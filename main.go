@@ -10,7 +10,7 @@ func main() {
 		IsActive:  true,
 	}
 
-	user1.Deactivate()
+	//user1.Deactivate()
 
 	fmt.Println(user1)
 
@@ -22,9 +22,19 @@ func main() {
 		IsIssued: false,
 	}
 
-	fmt.Println(book1)
+	//Выдать книгу читателю user1
 	book1.IssueBook(&user1)
 	fmt.Println(book1)
-	book1.ReturnBook()
-	fmt.Println(book1)
+
+	//Пробуем выдать уже выданную книгу
+	reader2 := Reader{
+		ID:        2,
+		FirstName: "Sergey",
+		LastName:  "Meniaylo",
+		IsActive:  true,
+	}
+	book1.IssueBook(&reader2)
+
+	//Возвращаем
+
 }

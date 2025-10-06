@@ -26,13 +26,13 @@ func (r Reader) DisplayReader() {
 }
 
 func (r Reader) String() string {
-	activityString := ""
+	status := ""
 	if r.IsActive {
-		activityString = "активен"
+		status = "активен"
 	} else {
-		activityString = "не активен"
+		status = "не активен"
 	}
-	return fmt.Sprintf("Пользователь %s %s, № %d, пользователь %s", r.FirstName, r.LastName, r.ID, activityString)
+	return fmt.Sprintf("Пользователь %s %s, № %d, пользователь %s", r.FirstName, r.LastName, r.ID, status)
 }
 
 // IssueBook выдает книгу читателю
