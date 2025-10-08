@@ -22,9 +22,10 @@ func main() {
 		IsIssued: false,
 	}
 
-	//Выдать книгу читателю user1
+	//Выдать книгу конкретному читателю
 	book1.IssueBook(&user1)
 	fmt.Println(book1)
+	fmt.Println("---")
 
 	//Пробуем выдать уже выданную книгу
 	reader2 := Reader{
@@ -35,6 +36,16 @@ func main() {
 	}
 	book1.IssueBook(&reader2)
 
-	//Возвращаем
+	//Возвращаем книгу
+	book1.ReturnBook()
+	fmt.Println(book1)
+	fmt.Println("---")
 
+	//Дективируем читатаеля
+	user1.Deactivate()
+	fmt.Println(user1)
+	fmt.Println("---")
+
+	//Пробуем выдать книгу неактивному читателю
+	book1.IssueBook(&user1)
 }

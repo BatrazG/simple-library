@@ -20,6 +20,12 @@ type Reader struct {
 	IsActive  bool
 }
 
+type Library struct {
+	Books   map[int]*Book
+	Readers map[int]*Reader
+	//и т.д.
+}
+
 // DisplayReader выводит полную информацию о пользователе
 func (r Reader) DisplayReader() {
 	fmt.Printf("Читатель: %s %s (ID: %d)\n", r.FirstName, r.LastName, r.ID)
@@ -40,6 +46,9 @@ func (b *Book) IssueBook(reader *Reader) {
 	if b.IsIssued {
 		fmt.Printf("Книга '%s' уже кому-то выдана\n", b.Title)
 		return
+	}
+	if !reader.IsActive {
+		fmt.Printf("Читатель %s %s не активен и не может получить книгу.", reader.FirstName, reader.LastName)
 	}
 	b.IsIssued = true
 	b.ReaderID = &reader.ID
