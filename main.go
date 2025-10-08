@@ -48,4 +48,22 @@ func main() {
 
 	//Пробуем выдать книгу неактивному читателю
 	book1.IssueBook(&user1)
+
+	//Интеграция уведомителя
+	fmt.Println("Проверяем интеграцию уведомителя")
+
+	// Создаем срез типа интерфейса Notifier
+	notifers := []Notifer{
+		EmailNotifer{EmailAdress: "a.kokoity@example.ru"},
+		SMSNotifer{PhoneNumber: "799912345678"},
+	}
+
+	// Создаем сообщение
+	message := "Ваша книга '1984' просрочена!"
+
+	// Проходимся по всем уведомителям и вызываем их общий метод
+	// Нам не важно, email это или sms, мы просто знаем, что они умеют уведомлять.
+	for _, notifer := range notifers {
+		notifer.Notify(message)
+	}
 }
