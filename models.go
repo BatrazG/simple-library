@@ -20,10 +20,60 @@ type Reader struct {
 	IsActive  bool
 }
 
+// Library - наша центральная структура-агрегатор
 type Library struct {
-	Books   map[int]*Book
-	Readers map[int]*Reader
-	//и т.д.
+	Books   []*Book
+	Readers []*Reader
+
+	//Счетчики для генерации уникальных ID
+	lastBookID   int
+	lastReaderID int
+}
+
+func (lib *Library) AddReader(firstName, lastName string) *Reader {
+	lib.lastReaderID++
+
+	//Создаем нового читателя
+	newReader := &Reader{
+		ID:        lib.lastReaderID,
+		FirstName: firstName,
+		LastName:  lastName,
+		IsActive:  true, //Новый читатель всегда активный
+	}
+
+	//Добавляем читателя в срез
+	lib.Readers = append(lib.Readers, newReader)
+
+	fmt.Printf("Зарегистрирован новый читатель: %s %s \n", firstName, lastName)
+	return newReader
+}
+
+/*// NewLibrary Создает экземпляр новой библиотеки
+func NewLibrary() *Library {
+	return &Library{
+		Books:   make(map[int]*Book),
+		Readers: make(map[int]*Reader),
+	}
+}*/
+
+// AddBook добавляет новую книгу в библиотеку
+func (lib *Library) AddBook(title, author string, year int) *Book {
+	lib.lastBookID++
+
+	//Создаем новую книгу
+	newBook := &Book{
+		ID:       lib.lastBookID,
+		Title:    title,
+		Author:   author,
+		Year:     year,
+		IsIssued: false, //Новая книга всегда в наличии
+	}
+
+	//Добавляем новую книгу в библиотеку
+	lib.Books = append(lib.Books, newBook)
+
+	fmt.Printf("Добавлена новая книга: %s\n", newBook)
+	return newBook
 }
 
 // DisplayReader выводит полную информацию о пользователе
@@ -49,6 +99,7 @@ func (b *Book) IssueBook(reader *Reader) {
 	}
 	if !reader.IsActive {
 		fmt.Printf("Читатель %s %s не активен и не может получить книгу.", reader.FirstName, reader.LastName)
+		return
 	}
 	b.IsIssued = true
 	b.ReaderID = &reader.ID

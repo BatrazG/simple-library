@@ -3,67 +3,21 @@ package main
 import "fmt"
 
 func main() {
-	user1 := Reader{
-		ID:        1,
-		FirstName: "Agunda",
-		LastName:  "Kokoyti",
-		IsActive:  true,
-	}
+	fmt.Println("Запуск системы управления библиотекой")
 
-	//user1.Deactivate()
+	//1. Создаем экземпляр библиотеки
+	myLibrary := &Library{} //Пустая библиотека готова к работе
 
-	fmt.Println(user1)
+	fmt.Println("Наполняем библиотеку")
+	//2. Добавляем читателей
+	myLibrary.AddReader("Агунда", "Кокойти")
+	myLibrary.AddReader("Сергей", "Меняйло")
 
-	book1 := Book{
-		ID:       1,
-		Title:    "1984",
-		Author:   "Джордж Оруэлл",
-		Year:     1949,
-		IsIssued: false,
-	}
+	//3. Добавляем книги
+	myLibrary.AddBook("1984", "Джордж Оруэлл", 1949)
+	myLibrary.AddBook("Мастер и Маргарита", "Михаил Булгаков", 1967)
 
-	//Выдать книгу конкретному читателю
-	book1.IssueBook(&user1)
-	fmt.Println(book1)
-	fmt.Println("---")
-
-	//Пробуем выдать уже выданную книгу
-	reader2 := Reader{
-		ID:        2,
-		FirstName: "Sergey",
-		LastName:  "Meniaylo",
-		IsActive:  true,
-	}
-	book1.IssueBook(&reader2)
-
-	//Возвращаем книгу
-	book1.ReturnBook()
-	fmt.Println(book1)
-	fmt.Println("---")
-
-	//Дективируем читатаеля
-	user1.Deactivate()
-	fmt.Println(user1)
-	fmt.Println("---")
-
-	//Пробуем выдать книгу неактивному читателю
-	book1.IssueBook(&user1)
-
-	//Интеграция уведомителя
-	fmt.Println("Проверяем интеграцию уведомителя")
-
-	// Создаем срез типа интерфейса Notifier
-	notifers := []Notifer{
-		EmailNotifer{EmailAdress: "a.kokoity@example.ru"},
-		SMSNotifer{PhoneNumber: "799912345678"},
-	}
-
-	// Создаем сообщение
-	message := "Ваша книга '1984' просрочена!"
-
-	// Проходимся по всем уведомителям и вызываем их общий метод
-	// Нам не важно, email это или sms, мы просто знаем, что они умеют уведомлять.
-	for _, notifer := range notifers {
-		notifer.Notify(message)
-	}
+	fmt.Println("\n---Библиотека готова к работе---")
+	fmt.Println("Количество читателей:", len(myLibrary.Readers))
+	fmt.Println("Количество книг:", len(myLibrary.Books))
 }
