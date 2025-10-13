@@ -13,11 +13,67 @@ type Book struct {
 	ReaderID *int //ID читателя, который взял книгу
 }
 
+// IssueBook выдает книгу читателю
+func (b *Book) IssueBook(reader *Reader) {
+	if b.IsIssued {
+		fmt.Printf("Книга '%s' уже кому-то выдана\n", b.Title)
+		return
+	}
+	if !reader.IsActive {
+		fmt.Printf("Читатель %s %s не активен и не может получить книгу.", reader.FirstName, reader.LastName)
+		return
+	}
+	b.IsIssued = true
+	b.ReaderID = &reader.ID
+	fmt.Printf("Книга '%s' была выдана читателю %s %s\n", b.Title, reader.FirstName, reader.LastName)
+}
+
+// ReturnBook возвращает книгу в библиотеку
+func (b *Book) ReturnBook() {
+	//Нужно будет реализовать с учетом нового в проекте
+	if !b.IsIssued {
+		fmt.Printf("Книга '%s' и так в библиотеке", b.Title)
+		return
+	}
+	b.IsIssued = false
+	b.ReaderID = nil
+	fmt.Printf("Книга '%s' возвращена в библиотеку\n", b.Title)
+}
+
 type Reader struct {
 	ID        int
 	FirstName string
 	LastName  string
 	IsActive  bool
+}
+
+// DisplayReader выводит полную информацию о пользователе
+//Этот метод больше не нужен, потому что мы реализовали String() для Reader
+/*func (r Reader) DisplayReader() {
+	fmt.Printf("Читатель: %s %s (ID: %d)\n", r.FirstName, r.LastName, r.ID)
+}*/
+
+func (r Reader) String() string {
+	status := ""
+	if r.IsActive {
+		status = "активен"
+	} else {
+		status = "не активен"
+	}
+	return fmt.Sprintf("Пользователь %s %s, № %d, пользователь %s", r.FirstName, r.LastName, r.ID, status)
+}
+
+// Deactivate делает пользователя неактивным
+func (r *Reader) Deactivate() {
+	r.IsActive = false
+}
+
+func (b Book) String() string {
+	status := "в библиотеке"
+	if b.IsIssued && b.ReaderID != nil {
+		status = fmt.Sprintf("на руках у читателя с ID %d", *b.ReaderID)
+	}
+	return fmt.Sprintf("%s (%s, %d), статус %s", b.Title, b.Author, b.Year, status)
 }
 
 // Library - наша центральная структура-агрегатор
@@ -48,14 +104,6 @@ func (lib *Library) AddReader(firstName, lastName string) *Reader {
 	return newReader
 }
 
-/*// NewLibrary Создает экземпляр новой библиотеки
-func NewLibrary() *Library {
-	return &Library{
-		Books:   make(map[int]*Book),
-		Readers: make(map[int]*Reader),
-	}
-}*/
-
 // AddBook добавляет новую книгу в библиотеку
 func (lib *Library) AddBook(title, author string, year int) *Book {
 	lib.lastBookID++
@@ -76,56 +124,43 @@ func (lib *Library) AddBook(title, author string, year int) *Book {
 	return newBook
 }
 
-// DisplayReader выводит полную информацию о пользователе
-func (r Reader) DisplayReader() {
-	fmt.Printf("Читатель: %s %s (ID: %d)\n", r.FirstName, r.LastName, r.ID)
+// FindBookByID ищет книгу по ее уникальному ID
+func (lib *Library) FindBookByID(id int) (*Book, error) {
+	for _, book := range lib.Books {
+		if book.ID == id {
+			return book, nil
+		}
+	}
+
+	return nil, fmt.Errorf("книга с ID %d не найдена в библиотеке", id)
 }
 
-func (r Reader) String() string {
-	status := ""
-	if r.IsActive {
-		status = "активен"
-	} else {
-		status = "не активен"
+// FindReaderByID ищет читателя по его уникальному ID
+func (lib *Library) FindReaderByID(id int) (*Reader, error) {
+	for _, reader := range lib.Readers {
+		if reader.ID == id {
+			return reader, nil
+		}
 	}
-	return fmt.Sprintf("Пользователь %s %s, № %d, пользователь %s", r.FirstName, r.LastName, r.ID, status)
+
+	return nil, fmt.Errorf("читатель с ID %d не найден", id)
 }
 
-// IssueBook выдает книгу читателю
-func (b *Book) IssueBook(reader *Reader) {
-	if b.IsIssued {
-		fmt.Printf("Книга '%s' уже кому-то выдана\n", b.Title)
-		return
+// IssueBookToReader - основной публичный метод для выдачи книги
+func (lib *Library) IssueBookToReader(bookID, readerID int) error {
+	book, err := lib.FindBookByID(bookID)
+	if err != nil {
+		return err
 	}
-	if !reader.IsActive {
-		fmt.Printf("Читатель %s %s не активен и не может получить книгу.", reader.FirstName, reader.LastName)
-		return
-	}
-	b.IsIssued = true
-	b.ReaderID = &reader.ID
-	fmt.Printf("Книга '%s' была выдана читателю %s %s\n", b.Title, reader.FirstName, reader.LastName)
-}
 
-// ReturnBook возвращает книгу в библиотеку
-func (b *Book) ReturnBook() {
-	if !b.IsIssued {
-		fmt.Printf("Книга '%s' и так в библиотеке", b.Title)
-		return
+	reader, err := lib.FindReaderByID(readerID)
+	if err != nil {
+		return err
 	}
-	b.IsIssued = false
-	b.ReaderID = nil
-	fmt.Printf("Книга '%s' возвращена в библиотеку\n", b.Title)
-}
 
-// Deactivate делает пользователя неактивным
-func (r *Reader) Deactivate() {
-	r.IsActive = false
-}
+	//Делегируем выдачу книги методу самой книги
+	//который мы создали ранее
+	book.IssueBook(reader)
+	return nil
 
-func (b Book) String() string {
-	status := "в библиотеке"
-	if b.IsIssued && b.ReaderID != nil {
-		status = fmt.Sprintf("на руках у читателя с ID %d", *b.ReaderID)
-	}
-	return fmt.Sprintf("%s (%s, %d), статус %s", b.Title, b.Author, b.Year, status)
 }
