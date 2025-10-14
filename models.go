@@ -73,7 +73,7 @@ func (b Book) String() string {
 	if b.IsIssued && b.ReaderID != nil {
 		status = fmt.Sprintf("на руках у читателя с ID %d", *b.ReaderID)
 	}
-	return fmt.Sprintf("%s (%s, %d), статус %s", b.Title, b.Author, b.Year, status)
+	return fmt.Sprintf("%s (%s, %d), статус: %s", b.Title, b.Author, b.Year, status)
 }
 
 // Library - наша центральная структура-агрегатор
@@ -163,4 +163,14 @@ func (lib *Library) IssueBookToReader(bookID, readerID int) error {
 	book.IssueBook(reader)
 	return nil
 
+}
+
+// ListAllBooksПоказывает все книги в библиотеке
+func (lib *Library) ListAllBooks() {
+	fmt.Println("---Список всех книг---")
+	for i, book := range lib.Books {
+		fmt.Println(i+1, book)
+	}
+
+	fmt.Println("----------------------")
 }

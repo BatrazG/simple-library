@@ -41,4 +41,6 @@ func main() {
 		fmt.Println("Ожидаемая ошибка:", err)
 	}
 
+	//Смотрим все книги в библиотеке
+	myLibrary.ListAllBooks()
 }
