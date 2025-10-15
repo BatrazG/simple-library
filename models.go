@@ -13,19 +13,20 @@ type Book struct {
 	ReaderID *int //ID читателя, который взял книгу
 }
 
-// IssueBook выдает книгу читателю
-func (b *Book) IssueBook(reader *Reader) {
+// IssueBook выдает книгу читателю. Теперь возвращает ошибку.
+func (b *Book) IssueBook(reader *Reader) error {
 	if b.IsIssued {
-		fmt.Printf("Книга '%s' уже кому-то выдана\n", b.Title)
-		return
+		//Теперь возвращаем ошибку, а не печатаем в консоль
+		return fmt.Errorf("Книга '%s' уже выдана\n", b.Title)
 	}
 	if !reader.IsActive {
-		fmt.Printf("Читатель %s %s не активен и не может получить книгу.", reader.FirstName, reader.LastName)
-		return
+		return fmt.Errorf("Читатель %s %s не активен и не может получить книгу.", reader.FirstName, reader.LastName)
 	}
 	b.IsIssued = true
 	b.ReaderID = &reader.ID
-	fmt.Printf("Книга '%s' была выдана читателю %s %s\n", b.Title, reader.FirstName, reader.LastName)
+	//fmt.Println больше не нужен. Сообщение об успехе будет выводить вызывающий код
+	//fmt.Printf("Книга '%s' была выдана читателю %s %s\n", b.Title, reader.FirstName, reader.LastName)
+	return nil //Книга успешно выдана
 }
 
 // ReturnBook возвращает книгу в библиотеку
@@ -148,21 +149,24 @@ func (lib *Library) FindReaderByID(id int) (*Reader, error) {
 
 // IssueBookToReader - основной публичный метод для выдачи книги
 func (lib *Library) IssueBookToReader(bookID, readerID int) error {
+	//1. Найти книгу
 	book, err := lib.FindBookByID(bookID)
 	if err != nil {
 		return err
 	}
 
+	//2. Найти читателя
 	reader, err := lib.FindReaderByID(readerID)
 	if err != nil {
 		return err
 	}
 
-	//Делегируем выдачу книги методу самой книги
-	//который мы создали ранее
-	book.IssueBook(reader)
-	return nil
-
+	//Вызываем обновленный метод и ПРОВЕРЯЕМ ОШИБКУ
+	err = book.IssueBook(reader)
+	if err != nil {
+		return err
+	}
+	return nil //Все 3 шага прошли успешно
 }
 
 // ListAllBooksПоказывает все книги в библиотеке
