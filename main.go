@@ -61,4 +61,26 @@ func main() {
 
 	//Смотрим все книги в библиотеке
 	myLibrary.ListAllBooks()
+
+	fmt.Println("Поиск порта")
+	config := map[string]string{
+		"PORT": "456",
+	}
+
+	port, err := GetPortFromConfig(config)
+	if err != nil {
+		fmt.Println("Ошибка:", err)
+	} else {
+		fmt.Println(port)
+	}
+
+	config = map[string]string{
+		"tort": "medivik",
+	}
+	port, err = GetPortFromConfig(config)
+	if err != nil {
+		fmt.Println("Ошибка:", err)
+	} else {
+		fmt.Println(port)
+	}
 }
