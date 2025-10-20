@@ -17,10 +17,10 @@ type Book struct {
 func (b *Book) IssueBook(reader *Reader) error {
 	if b.IsIssued {
 		//Теперь возвращаем ошибку, а не печатаем в консоль
-		return fmt.Errorf("Книга '%s' уже выдана\n", b.Title)
+		return fmt.Errorf("книга '%s' уже выдана", b.Title)
 	}
 	if !reader.IsActive {
-		return fmt.Errorf("Читатель %s %s не активен и не может получить книгу.", reader.FirstName, reader.LastName)
+		return fmt.Errorf("читатель %s %s не активен и не может получить книгу.", reader.FirstName, reader.LastName)
 	}
 	b.IsIssued = true
 	b.ReaderID = &reader.ID
@@ -30,15 +30,14 @@ func (b *Book) IssueBook(reader *Reader) error {
 }
 
 // ReturnBook возвращает книгу в библиотеку
-func (b *Book) ReturnBook() {
+func (b *Book) ReturnBook() error {
 	//Нужно будет реализовать с учетом нового в проекте
 	if !b.IsIssued {
-		fmt.Printf("Книга '%s' и так в библиотеке", b.Title)
-		return
+		return fmt.Errorf("книга '%s' и так в библиотеке", b.Title)
 	}
 	b.IsIssued = false
 	b.ReaderID = nil
-	fmt.Printf("Книга '%s' возвращена в библиотеку\n", b.Title)
+	return nil
 }
 
 type Reader struct {
@@ -167,6 +166,10 @@ func (lib *Library) IssueBookToReader(bookID, readerID int) error {
 		return err
 	}
 	return nil //Все 3 шага прошли успешно
+}
+
+func (lib *Library) ReturnBook(bookID int) error {
+	lib.FindBookByID(bookID)
 }
 
 // ListAllBooksПоказывает все книги в библиотеке
