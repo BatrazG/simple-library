@@ -46,7 +46,7 @@ func SaveBooksToCSV(filename string, books []domain.Book) error {
 	return nil
 }
 
-//LoadBooksFromCSV загружает список книг из csv
+// LoadBooksFromCSV загружает список книг из csv
 func LoadBooksFromCSV(filename string) ([]domain.Book, error) {
 	file, err := os.Open(filename)
 	if err != nil {
@@ -56,7 +56,7 @@ func LoadBooksFromCSV(filename string) ([]domain.Book, error) {
 
 	reader := csv.NewReader(file)
 	//Пропускаем строку заголовка
-	if _, err := reader.Read(), err != nil {
+	if _, err := reader.Read(); err != nil {
 		return nil, fmt.Errorf("не удалось прочитать заголовок из файла: %w", err)
 	}
 
@@ -66,26 +66,26 @@ func LoadBooksFromCSV(filename string) ([]domain.Book, error) {
 	}
 
 	var books []domain.Book
-	for i, record := range records{
+	for i, record := range records {
 		if len(record) < 4 {
 			continue //если строка содержит меньше 4 полей - данные о книге неподные, пропускаем
 		}
-		
+
 		id, err := strconv.Atoi(record[0])
 		if err != nil {
 			continue //Неверный формат ID, пропускаем
 		}
-		
+
 		year, err := strconv.Atoi(record[3])
 		if err != nil {
 			continue //Неверный формат года, пропускаем
 		}
 
 		book := domain.Book{
-			ID: id,
-			Title: record[1],
+			ID:     id,
+			Title:  record[1],
 			Author: record[2],
-			Year: year,
+			Year:   year,
 		}
 
 		books = append(books, book)
