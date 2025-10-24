@@ -75,8 +75,11 @@ func (lib *Library) FindBookByID(id int) (*domain.Book, error) {
 }
 
 func (lib *Library) FindBookByTitle(title string) ([]*domain.Book, error) {
-	cleanedTitle := strings.TrimSpace(title)
-	cleanedTitle = strings.ToLower(cleanedTitle)
+	if lib == nil || len(lib.Books) == 0 {
+		return nil, fmt.Errorf("библиотека не создана или не содержит книг")
+	}
+
+	cleanedTitle := strings.ToLower(strings.TrimSpace(title))
 
 	books := []*domain.Book{}
 
@@ -85,13 +88,22 @@ func (lib *Library) FindBookByTitle(title string) ([]*domain.Book, error) {
 	}
 
 	for _, book := range lib.Books {
-		cleanedBook := strings.TrimSpace(book.Title)
-		cleanedBook = strings.ToLower(cleanedBook)
+		if book == nil {
+			continue
+		}
+		cleanedBook := strings.ToLower(strings.TrimSpace(book.Title))
 
 		if cleanedBook == cleanedTitle {
 			books = append(books, book)
 		}
 	}
+
+	/*
+		if strings.EqualFold(book.Title, title) {
+				// Возвращаем указатель на элемент в срезе
+				return &l.Books[i], nil
+			}
+	*/
 
 	return books, nil
 }
