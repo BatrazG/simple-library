@@ -1,7 +1,9 @@
 package main
 
 import (
+	"errors"
 	"fmt"
+	"strings"
 )
 
 type Book struct {
@@ -13,6 +15,14 @@ type Book struct {
 	ReaderID *int //ID читателя, который взял книгу
 }
 
+func (b Book) String() string {
+	status := "в библиотеке"
+	if b.IsIssued && b.ReaderID != nil {
+		status = fmt.Sprintf("на руках у читателя с ID %d", *b.ReaderID)
+	}
+	return fmt.Sprintf("%s (%s, %d), статус: %s", b.Title, b.Author, b.Year, status)
+}
+
 // IssueBook выдает книгу читателю. Теперь возвращает ошибку.
 func (b *Book) IssueBook(reader *Reader) error {
 	if b.IsIssued {
@@ -20,18 +30,16 @@ func (b *Book) IssueBook(reader *Reader) error {
 		return fmt.Errorf("книга '%s' уже выдана", b.Title)
 	}
 	if !reader.IsActive {
-		return fmt.Errorf("читатель %s %s не активен и не может получить книгу.", reader.FirstName, reader.LastName)
+		return fmt.Errorf("читатель %s %s не активен и не может получить книгу", reader.FirstName, reader.LastName)
 	}
 	b.IsIssued = true
 	b.ReaderID = &reader.ID
-	//fmt.Println больше не нужен. Сообщение об успехе будет выводить вызывающий код
-	//fmt.Printf("Книга '%s' была выдана читателю %s %s\n", b.Title, reader.FirstName, reader.LastName)
+
 	return nil //Книга успешно выдана
 }
 
 // ReturnBook возвращает книгу в библиотеку
 func (b *Book) ReturnBook() error {
-	//Нужно будет реализовать с учетом нового в проекте
 	if !b.IsIssued {
 		return fmt.Errorf("книга '%s' и так в библиотеке", b.Title)
 	}
@@ -46,12 +54,6 @@ type Reader struct {
 	LastName  string
 	IsActive  bool
 }
-
-// DisplayReader выводит полную информацию о пользователе
-//Этот метод больше не нужен, потому что мы реализовали String() для Reader
-/*func (r Reader) DisplayReader() {
-	fmt.Printf("Читатель: %s %s (ID: %d)\n", r.FirstName, r.LastName, r.ID)
-}*/
 
 func (r Reader) String() string {
 	status := ""
@@ -68,12 +70,8 @@ func (r *Reader) Deactivate() {
 	r.IsActive = false
 }
 
-func (b Book) String() string {
-	status := "в библиотеке"
-	if b.IsIssued && b.ReaderID != nil {
-		status = fmt.Sprintf("на руках у читателя с ID %d", *b.ReaderID)
-	}
-	return fmt.Sprintf("%s (%s, %d), статус: %s", b.Title, b.Author, b.Year, status)
+func (r *Reader) Activate() {
+	r.IsActive = true
 }
 
 // Library - наша центральная структура-агрегатор
@@ -86,7 +84,14 @@ type Library struct {
 	lastReaderID int
 }
 
-func (lib *Library) AddReader(firstName, lastName string) *Reader {
+func (lib *Library) AddReader(firstName, lastName string) (*Reader, error) {
+	cleanedFirstName := strings.TrimSpace(firstName)
+	cleanedLastName := strings.TrimSpace(lastName)
+
+	if cleanedFirstName == "" || cleanedLastName == "" {
+		return nil, errors.New("фамилия и имя не могут быть пустыми")
+	}
+
 	lib.lastReaderID++
 
 	//Создаем нового читателя
@@ -100,8 +105,7 @@ func (lib *Library) AddReader(firstName, lastName string) *Reader {
 	//Добавляем читателя в срез
 	lib.Readers = append(lib.Readers, newReader)
 
-	fmt.Printf("Зарегистрирован новый читатель: %s %s \n", firstName, lastName)
-	return newReader
+	return newReader, nil
 }
 
 // AddBook добавляет новую книгу в библиотеку
@@ -119,8 +123,6 @@ func (lib *Library) AddBook(title, author string, year int) *Book {
 
 	//Добавляем новую книгу в библиотеку
 	lib.Books = append(lib.Books, newBook)
-
-	fmt.Printf("Добавлена новая книга: %s\n", newBook)
 	return newBook
 }
 
@@ -169,15 +171,18 @@ func (lib *Library) IssueBookToReader(bookID, readerID int) error {
 }
 
 func (lib *Library) ReturnBook(bookID int) error {
-	lib.FindBookByID(bookID)
+	book, err := lib.FindBookByID(bookID)
+	if err != nil {
+		return err
+	}
+	err = book.ReturnBook()
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
-// ListAllBooksПоказывает все книги в библиотеке
-func (lib *Library) ListAllBooks() {
-	fmt.Println("---Список всех книг---")
-	for i, book := range lib.Books {
-		fmt.Println(i+1, book)
-	}
-
-	fmt.Println("----------------------")
+// GetAllBooksПоказывает все книги в библиотеке
+func (lib *Library) GetAllBooks() []*Book {
+	return lib.Books
 }
