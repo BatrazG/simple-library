@@ -74,6 +74,28 @@ func (lib *Library) FindBookByID(id int) (*domain.Book, error) {
 	return nil, fmt.Errorf("книга с ID %d не найдена в библиотеке", id)
 }
 
+func (lib *Library) FindBookByTitle(title string) ([]*domain.Book, error) {
+	cleanedTitle := strings.TrimSpace(title)
+	cleanedTitle = strings.ToLower(cleanedTitle)
+
+	books := []*domain.Book{}
+
+	if cleanedTitle == "" {
+		return books, errors.New("название книги не может быть пустым")
+	}
+
+	for _, book := range lib.Books {
+		cleanedBook := strings.TrimSpace(book.Title)
+		cleanedBook = strings.ToLower(cleanedBook)
+
+		if cleanedBook == cleanedTitle {
+			books = append(books, book)
+		}
+	}
+
+	return books, nil
+}
+
 // FindReaderByID ищет читателя по его уникальному ID
 func (lib *Library) FindReaderByID(id int) (*domain.Reader, error) {
 	for _, reader := range lib.Readers {
