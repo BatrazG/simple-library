@@ -12,6 +12,7 @@ func main() {
 
 	myLibrary.AddBook("1984", "Джордж Оруэлл", 1949)
 	myLibrary.AddBook("Мастер и Маргарита", "Михаил Булгаков", 1967)
+	myLibrary.AddBook("мастер и маргарита", "Михаил Булгаков", 1998)
 
 	_, err := myLibrary.AddReader("Агунда", "Кокойти")
 	if err != nil {

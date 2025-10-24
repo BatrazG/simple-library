@@ -97,13 +97,9 @@ func (lib *Library) FindBookByTitle(title string) ([]*domain.Book, error) {
 			books = append(books, book)
 		}
 	}
-
-	/*
-		if strings.EqualFold(book.Title, title) {
-				// Возвращаем указатель на элемент в срезе
-				return &l.Books[i], nil
-			}
-	*/
+	// Также для strings.EqualFold(book.Title, title)
+	//и вообще для проверки пользовательского ввода
+	//-сравнение строк без учета регистра
 
 	return books, nil
 }
