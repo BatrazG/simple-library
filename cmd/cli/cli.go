@@ -1,0 +1,196 @@
+package cli
+
+import (
+	"bufio"
+	"fmt"
+	"os"
+	"strconv"
+	"strings"
+
+	"github.com/BatrazG/simple-library/library"
+)
+
+// Run запускает главный цикл консольного приложения.
+// Он принимает сервис библиотеки как зависимость.
+func Run(lib *library.Library) {
+	scanner := bufio.NewScanner(os.Stdin)
+
+	for {
+		printMenu()
+
+		scanner.Scan()
+		inputText := scanner.Text()
+
+		choice, err := strconv.Atoi(strings.TrimSpace(inputText))
+		if err != nil {
+			fmt.Println("Ошибка: Пожалуйста, введите число.")
+			continue
+		}
+
+		handleChoice(choice, lib, scanner) // Передаем сервис и сканер в обработчик
+
+		if choice == 8 {
+			break // Выходим из цикла, если выбрали выход
+		}
+	}
+}
+
+// printMenu отвечает за вывод в консоль пользовательского меню
+func printMenu() {
+	//Вывод меню
+	fmt.Println("Главное меню:")
+	fmt.Println("1. Поиск книги по названию")
+	fmt.Println("2. Поиск книги по номеру")
+	fmt.Println("3. Выдать книгу")
+	fmt.Println("4. Вернуть книгу")
+	fmt.Println("5. Поиск читателя по номеру")
+	fmt.Println("6. Показать список книг")
+	fmt.Println("7. Экспорт списка книг")
+	fmt.Println("8. Импорт списка книг")
+	fmt.Println("Выберите пункт меню:")
+}
+
+// handlerChoice обрабатывает выбор пользователем пункта меню
+func handleChoice(choice int, lib *library.Library, scanner *bufio.Scanner) {
+	switch choice {
+	case 1: //поиск книги по названию
+		fmt.Println("---Введите название книги:---")
+		scanner.Scan()
+		title := scanner.Text()
+		foundBooks, err := lib.FindBookByTitle(title)
+		if err != nil {
+			fmt.Println("Произошла ошибка поиска: ", err)
+			return
+		}
+
+		if len(foundBooks) == 0 {
+			fmt.Printf("Совпадений с названием %s не найдено\n", title)
+		} else {
+			for _, book := range foundBooks {
+				fmt.Println(book)
+			}
+		}
+	case 2: //Поиск книги по ID
+		fmt.Println("---Введите номер книги:---")
+		scanner.Scan()
+		bookID, err := strconv.Atoi(scanner.Text())
+		if err != nil {
+			fmt.Println("Номер книги должен быть числом")
+			return
+		}
+		foundBook, err := lib.FindBookByID(bookID)
+		if err != nil {
+			fmt.Println("Произошла ошибка поиска: ", err)
+		} else {
+			fmt.Printf("Книга с номером %d %s\n:", bookID, foundBook)
+		}
+	case 3: //Выдача книги читателю
+		fmt.Println("---Введите ID книги:---")
+		scanner.Scan()
+		bookID, err := strconv.Atoi(scanner.Text())
+		if err != nil {
+			fmt.Println("Номер книги должен быть числом")
+			return
+		}
+		fmt.Println("---Введите ID читателя---")
+		scanner.Scan()
+		readerID, err := strconv.Atoi(scanner.Text())
+		if err != nil {
+			fmt.Println("Номер читателя должен быть числом")
+			return
+		}
+		//Выдыча книги читателю
+		err = lib.IssueBookToReader(bookID, readerID)
+		if err != nil {
+			fmt.Println("Произошла ошибка выдачи книги:", err)
+			return
+		}
+		fmt.Printf("Книга с ID %d успешно выдана читателю с ID %d", bookID, readerID)
+	case 4: //Возврат книги
+		fmt.Println("---Введите ID книги:---")
+		scanner.Scan()
+		bookID, err := strconv.Atoi(scanner.Text())
+		if err != nil {
+			fmt.Println("Номер книги должен быть числом")
+			return
+		}
+		err = lib.ReturnBook(bookID)
+		if err != nil {
+			fmt.Println("Произошла при возврате книги:", err)
+			return
+		}
+		fmt.Printf("Книга с ID %d успешно возвращена в библиотеку", bookID)
+	case 5: //Поиск читателя по ID
+		fmt.Println("---Посик читателя по номеру---")
+		fmt.Println("Введите номер читателя")
+		scanner.Scan()
+		readerID, err := strconv.Atoi(scanner.Text())
+		if err != nil {
+			fmt.Println("Номер читателя должен быть числом")
+			return
+		}
+		reader, err := lib.FindReaderByID(readerID)
+		if err != nil {
+			fmt.Println("Произошла ошибка поиска читателя:", err)
+			return
+		}
+		fmt.Println(reader)
+	} //switch
+}
+
+/*
+//Создаем меню консольного приложения
+	scanner := bufio.NewScanner(os.Stdin)
+	for {
+		fmt.Println("Добро пожаловать в")
+		fmt.Println("\033[1m" + "Simple library" + "\033[0m") //С помощью управляющих символов делаем строку жирной
+		fmt.Println()
+
+
+
+		//Считываем ввод пользователя
+		scanner.Scan()
+		inputText := scanner.Text()
+
+		//Преобразуем строку в число
+		choice, err := strconv.Atoi(inputText)
+
+		//Проверяем на ошибку(если ввели не число)
+		if err != nil {
+			fmt.Println("Ошибка: пожалуйста, введите число от 1 до 8")
+			continue
+		}
+
+		//Выбираем действие
+		switch choice {
+		case 1: //поиск книги по названию
+			fmt.Println("Введите название книги:")
+			scanner.Scan()
+			title := scanner.Text()
+			foundBooks, err := myLibrary.FindBookByTitle(title)
+			if err != nil {
+				fmt.Println("Произошла ошибка: ", err)
+			} else if len(foundBooks) == 0 {
+				fmt.Printf("Совпадений с названием %s не найдено\n", title)
+			} else {
+				for _, book := range foundBooks {
+					fmt.Println(book)
+				}
+			}
+		case 2:
+			fmt.Println("Введите номер книги:")
+			scanner.Scan()
+			bookID, err := strconv.Atoi(scanner.Text())
+			if err != nil {
+				fmt.Println("Номер книги должен быть числом")
+				continue
+			}
+			foundBook, err := myLibrary.FindBookByID(bookID)
+			if err != nil {
+				fmt.Println("Произошла ошибка: ", err)
+			} else {
+				fmt.Printf("Книга с номером %d %s\n:", bookID, foundBook)
+			}
+		}
+	}
+*/
