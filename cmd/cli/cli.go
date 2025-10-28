@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/BatrazG/simple-library/library"
+	"github.com/BatrazG/simple-library/storage"
 )
 
 // Run запускает главный цикл консольного приложения.
@@ -29,7 +30,7 @@ func Run(lib *library.Library) {
 
 		handleChoice(choice, lib, scanner) // Передаем сервис и сканер в обработчик
 
-		if choice == 8 {
+		if choice == 0 {
 			break // Выходим из цикла, если выбрали выход
 		}
 	}
@@ -47,6 +48,8 @@ func printMenu() {
 	fmt.Println("6. Показать список книг")
 	fmt.Println("7. Экспорт списка книг")
 	fmt.Println("8. Импорт списка книг")
+	fmt.Println("9. Добавить новую книгу")
+	fmt.Println("0. Выход")
 	fmt.Println("Выберите пункт меню:")
 }
 
@@ -135,6 +138,41 @@ func handleChoice(choice int, lib *library.Library, scanner *bufio.Scanner) {
 			return
 		}
 		fmt.Println(reader)
+	case 6: //Вывод на экран списка всех книг
+		fmt.Println("\n---Список всех книг библиотеки---")
+		books := lib.GetAllBooks()
+		if len(books) == 0 {
+			fmt.Println("Библиотечный фонд пуст")
+			return
+		}
+		for i, book := range books {
+			fmt.Println(i+1, "\t", book)
+		}
+	case 7: //Экспорт списка книг в csv
+		fmt.Println("Введите название файла для экспорта в формате <название.csv>:")
+		scanner.Scan()
+		filename := scanner.Text()
+		if err := storage.SaveBooksToCSV(filename, lib.Books); err != nil {
+			fmt.Println("Произошла ошибка экспорта:", err)
+			return
+		}
+		fmt.Printf("Список книг успешно выгружен в файл %s", filename)
+	case 8:
+		scanner.Scan()
+		fmt.Println("Введите название файла:")
+		filename := scanner.Text()
+		loadedBooks, err := storage.LoadBooksFromCSV(filename)
+		if err != nil {
+			fmt.Println("Ошибка импорта:", err)
+			return
+		}
+		lib.Books = loadedBooks
+		fmt.Printf("Список книгу успешно импортирован из файла %s\n", filename)
+		for _, book := range lib.Books {
+			fmt.Println(book)
+		}
+	case 0:
+		fmt.Println("Всего доброго!")
 	} //switch
 }
 

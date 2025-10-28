@@ -3,18 +3,26 @@ package main
 import (
 	"fmt"
 
-	//"github.com/BatrazG/simple-library/cli"
 	"github.com/BatrazG/simple-library/cmd/cli"
 	"github.com/BatrazG/simple-library/library"
+	"github.com/BatrazG/simple-library/storage"
 )
 
 func main() {
 
 	myLibrary := library.New()
 
-	myLibrary.AddBook("1984", "Джордж Оруэлл", 1949)
+	/*myLibrary.AddBook("1984", "Джордж Оруэлл", 1949)
 	myLibrary.AddBook("Мастер и Маргарита", "Михаил Булгаков", 1967)
 	myLibrary.AddBook("мастер и маргарита", "Михаил Булгаков", 1998)
+	myLibrary.AddBook("мастер и маргарита", "Михаил Булгаков", 1998)*/
+
+	myLibrary.Books, _ = storage.LoadBooksFromCSV("test1.csv")
+	fmt.Println("--------------------------")
+	fmt.Printf("Количество книг: %d", len(myLibrary.Books))
+	for i, book := range myLibrary.Books {
+		fmt.Println(i, book)
+	}
 
 	_, err := myLibrary.AddReader("Агунда", "Кокойти")
 	if err != nil {
@@ -29,7 +37,9 @@ func main() {
 		fmt.Println("Читатель успешно добавлен")
 	}
 
-	allBooks := myLibrary.GetAllBooks()
+	cli.Run(myLibrary)
+
+	/*allBooks := myLibrary.GetAllBooks()
 	for _, book := range allBooks {
 		fmt.Println(book)
 
@@ -42,9 +52,7 @@ func main() {
 				fmt.Println(i+1, book)
 			}
 		}
-	}
-
-	cli.Run(myLibrary)
+	}*/
 
 }
 

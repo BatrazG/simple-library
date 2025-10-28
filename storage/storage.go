@@ -15,7 +15,7 @@ type Storable interface {
 }
 
 // Сохраняет срез книг в csv-файл
-func SaveBooksToCSV(filename string, books []domain.Book) error {
+func SaveBooksToCSV(filename string, books []*domain.Book) error {
 	file, err := os.Create(filename)
 	if err != nil {
 		return fmt.Errorf("не удалось создать файл %s: %w", filename, err)
@@ -47,28 +47,29 @@ func SaveBooksToCSV(filename string, books []domain.Book) error {
 }
 
 // LoadBooksFromCSV загружает список книг из csv
-func LoadBooksFromCSV(filename string) ([]domain.Book, error) {
+func LoadBooksFromCSV(filename string) ([]*domain.Book, error) {
 	file, err := os.Open(filename)
 	if err != nil {
-		return nil, fmt.Errorf("не удалось открыть файл %s:", err)
+		return nil, fmt.Errorf("не удалось открыть файл %s", filename)
 	}
 	defer file.Close()
 
 	reader := csv.NewReader(file)
-	//Пропускаем строку заголовка
-	if _, err := reader.Read(); err != nil {
-		return nil, fmt.Errorf("не удалось прочитать заголовок из файла: %w", err)
-	}
 
 	records, err := reader.ReadAll()
 	if err != nil {
-		fmt.Errorf("не удалось прочитать данные из файла: %w", err)
+		return nil, fmt.Errorf("не удалось прочитать данные из файла: %w", err)
 	}
 
-	var books []domain.Book
-	for i, record := range records {
+	if len(records) < 2 {
+		return []*domain.Book{}, nil
+	}
+
+	var books []*domain.Book
+	for i, record := range records[1:] {
 		if len(record) < 4 {
-			continue //если строка содержит меньше 4 полей - данные о книге неподные, пропускаем
+			fmt.Printf("Пропускаем строку %d, недостаточно полей", i+2)
+			continue
 		}
 
 		id, err := strconv.Atoi(record[0])
@@ -88,7 +89,12 @@ func LoadBooksFromCSV(filename string) ([]domain.Book, error) {
 			Year:   year,
 		}
 
-		books = append(books, book)
+		books = append(books, &book)
+	}
+
+	fmt.Println("Список загруженных книг: ")
+	for _, book := range books {
+		fmt.Println(book)
 	}
 	return books, nil
 
