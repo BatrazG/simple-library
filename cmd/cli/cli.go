@@ -48,7 +48,6 @@ func printMenu() {
 	fmt.Println("6. Показать список книг")
 	fmt.Println("7. Экспорт списка книг")
 	fmt.Println("8. Импорт списка книг")
-	fmt.Println("9. Добавить новую книгу")
 	fmt.Println("0. Выход")
 	fmt.Println("Выберите пункт меню:")
 }
@@ -157,9 +156,9 @@ func handleChoice(choice int, lib *library.Library, scanner *bufio.Scanner) {
 			return
 		}
 		fmt.Printf("Список книг успешно выгружен в файл %s", filename)
-	case 8:
+	case 8: //Импорт книг из csv
 		scanner.Scan()
-		fmt.Println("Введите название файла:")
+		fmt.Println("Введите название файла для импорта в формате <название.csv>::")
 		filename := scanner.Text()
 		loadedBooks, err := storage.LoadBooksFromCSV(filename)
 		if err != nil {
