@@ -31,6 +31,10 @@ func Run(lib *library.Library) {
 		handleChoice(choice, lib, scanner) // Передаем сервис и сканер в обработчик
 
 		if choice == 0 {
+			if err := storage.SaveBooksToCSV("books.csv", lib.Books); err != nil {
+				fmt.Println("Произошла ошибка сохранения списка книг:", err)
+				return
+			}
 			break // Выходим из цикла, если выбрали выход
 		}
 	}
@@ -48,6 +52,7 @@ func printMenu() {
 	fmt.Println("6. Показать список книг")
 	fmt.Println("7. Экспорт списка книг")
 	fmt.Println("8. Импорт списка книг")
+	fmt.Println("9. Добавление новой книги")
 	fmt.Println("0. Выход")
 	fmt.Println("Выберите пункт меню:")
 }
@@ -157,8 +162,8 @@ func handleChoice(choice int, lib *library.Library, scanner *bufio.Scanner) {
 		}
 		fmt.Printf("Список книг успешно выгружен в файл %s", filename)
 	case 8: //Импорт книг из csv
+		fmt.Println("Введите название файла для импорта в формате <название.csv>:")
 		scanner.Scan()
-		fmt.Println("Введите название файла для импорта в формате <название.csv>::")
 		filename := scanner.Text()
 		loadedBooks, err := storage.LoadBooksFromCSV(filename)
 		if err != nil {
@@ -170,6 +175,21 @@ func handleChoice(choice int, lib *library.Library, scanner *bufio.Scanner) {
 		for _, book := range lib.Books {
 			fmt.Println(book)
 		}
+	case 9:
+		fmt.Println("Введите название книги")
+		scanner.Scan()
+		title := scanner.Text()
+		fmt.Println("Введите автора")
+		scanner.Scan()
+		author := scanner.Text
+		fmt.Println("Введите год издания")
+		scanner.Scan()
+		year, err := strconv.Atoi(scanner.Text())
+		if err != nil {
+			fmt.Println("Год должен состояьб из цифр.")
+			return
+		}
+		lib.AddBook(title, author(), year)
 	case 0:
 		fmt.Println("Всего доброго!")
 	} //switch

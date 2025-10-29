@@ -17,7 +17,7 @@ func main() {
 	myLibrary.AddBook("мастер и маргарита", "Михаил Булгаков", 1998)
 	myLibrary.AddBook("мастер и маргарита", "Михаил Булгаков", 1998)*/
 
-	myLibrary.Books, _ = storage.LoadBooksFromCSV("test1.csv")
+	myLibrary.Books, _ = storage.LoadBooksFromCSV("books.csv")
 	fmt.Println("--------------------------")
 	fmt.Printf("Количество книг: %d\n", len(myLibrary.Books))
 	for i, book := range myLibrary.Books {
