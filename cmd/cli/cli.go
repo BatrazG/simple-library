@@ -43,6 +43,8 @@ func Run(lib *library.Library) {
 // printMenu отвечает за вывод в консоль пользовательского меню
 func printMenu() {
 	//Вывод меню
+	fmt.Println("")
+	fmt.Println("----------------")
 	fmt.Println("Главное меню:")
 	fmt.Println("1. Поиск книги по названию")
 	fmt.Println("2. Поиск книги по номеру")
@@ -175,7 +177,7 @@ func handleChoice(choice int, lib *library.Library, scanner *bufio.Scanner) {
 		for _, book := range lib.Books {
 			fmt.Println(book)
 		}
-	case 9:
+	case 9: //Новая книга
 		fmt.Println("Введите название книги")
 		scanner.Scan()
 		title := scanner.Text()
@@ -186,7 +188,7 @@ func handleChoice(choice int, lib *library.Library, scanner *bufio.Scanner) {
 		scanner.Scan()
 		year, err := strconv.Atoi(scanner.Text())
 		if err != nil {
-			fmt.Println("Год должен состояьб из цифр.")
+			fmt.Println("Год должен состояь из цифр.")
 			return
 		}
 		lib.AddBook(title, author(), year)

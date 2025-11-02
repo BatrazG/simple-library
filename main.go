@@ -19,7 +19,7 @@ func main() {
 
 	myLibrary.Books, _ = storage.LoadBooksFromCSV("books.csv")
 	fmt.Println("--------------------------")
-	fmt.Printf("Количество книг: %d\n", len(myLibrary.Books))
+
 	for i, book := range myLibrary.Books {
 		fmt.Println(i, book)
 	}
