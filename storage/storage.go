@@ -66,7 +66,7 @@ func LoadBooksFromCSV(filename string) ([]*domain.Book, error) {
 	reader := csv.NewReader(file)
 
 	//Ожидаемое количество столбцов
-	var expectedColumns = 6
+	const expectedColumns = 6
 
 	//Читаем заголовок отдельно, чтобы пропустить его
 	//Заодно убедимся, что файл не пустой
@@ -101,6 +101,7 @@ func LoadBooksFromCSV(filename string) ([]*domain.Book, error) {
 		//Проверяем на точное соответствие количества колонок
 		if len(record) != expectedColumns {
 			log.Printf("ПРЕДУПРЕЖДЕНИЕ: Пропущена строка %d, неверное количество колонок (ожидалось %d, получено %d)", lineNum, expectedColumns, len(record))
+			continue
 		}
 
 		//Ошибки будем логировать
@@ -145,4 +146,110 @@ func LoadBooksFromCSV(filename string) ([]*domain.Book, error) {
 		books = append(books, &book)
 	}
 	return books, nil
+}
+
+func SaveReaderToCSV(filename string, readers []*domain.Reader) error {
+	file, err := os.Create(filename)
+	if err != nil {
+		return fmt.Errorf("ошибка создания файла %s: %w", filename, err)
+	}
+	defer file.Close()
+
+	writer := csv.NewWriter(file)
+	defer writer.Flush()
+
+	//Записываем заголовок
+	headers := []string{"ID", "Имя", "Фамилия", "Активен"}
+	if err := writer.Write(headers); err != nil {
+		return fmt.Errorf("не удалось записать заголовок: %w", err)
+	}
+
+	for _, reader := range readers {
+		id := strconv.Itoa(reader.ID)
+		status := strconv.FormatBool(reader.IsActive)
+
+		record := []string{
+			id,
+			reader.FirstName,
+			reader.LastName,
+			status,
+		}
+
+		if err := writer.Write(record); err != nil {
+			return fmt.Errorf("не удалось саписать книгу с ID %d: %s", reader.ID, err)
+		}
+	}
+
+	return nil
+}
+
+func LoadReadersFromCSV(filename string) ([]*domain.Reader, error) {
+	file, err := os.Open(filename)
+	if err != nil {
+		return nil, fmt.Errorf("Произошла ошибка открытия файла %s", filename)
+	}
+	defer file.Close()
+
+	reader := csv.NewReader(file)
+
+	//Ожидаемое количество столбцов
+	const expectedColumns = 4
+
+	//Читаем заголовок отдельно, чтобы пропустить его
+	//Заодно убедимся, что файл не пустой
+	if _, err := reader.Read(); err != nil {
+		if errors.Is(err, io.EOF) {
+			//Файл пустой или содержит только заголовок
+			//Это не ошибка
+			return []*domain.Reader{}, nil
+		}
+		return nil, fmt.Errorf("не удалось прочитать заголовок: %w", err)
+	}
+
+	var readers []*domain.Reader
+	//Добавляем счетчик для более информативных логов
+	var lineNum int
+
+	// Читаем построчно
+	for {
+		lineNum++
+		record, err := reader.Read()
+		if err != nil {
+			//Если мы достигла конца файла
+			//-это нормальное завершение цикла
+			if errors.Is(err, io.EOF) {
+				break
+			}
+			//Любая другая ошибка при чтении является критической
+			return nil, fmt.Errorf("ошибка чтения файла на строке %d: %w", lineNum, err)
+		}
+
+		//Проверяем точное соответствие количества колонок
+		if len(record) != expectedColumns {
+			log.Printf("ПРЕДУПРЕЖДЕНИЕ: Пропущена строка %d, неверное количество колонок (%d вместо %d)", lineNum, expectedColumns, len(record))
+			continue
+		}
+
+		id, err := strconv.Atoi(record[0])
+		if err != nil {
+			log.Printf("ПРЕДУПРЕЖДЕНИЕ: Пропускаем строку %d, неверный формат ID: %v", lineNum, err)
+		}
+
+		status, err := strconv.ParseBool(record[3])
+		if err != nil {
+			log.Printf("ПРЕДУПРЕЖДЕНИЕ: Пропускаем строку %d, неверный формат поля \"Активен\"")
+			continue
+		}
+
+		reader := domain.Reader{
+			ID:        id,
+			FirstName: record[1],
+			LastName:  record[2],
+			IsActive:  status,
+		}
+
+		readers = append(readers, &reader)
+	}
+
+	return readers, nil
 }

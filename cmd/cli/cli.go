@@ -55,6 +55,9 @@ func printMenu() {
 	fmt.Println("7. Экспорт списка книг")
 	fmt.Println("8. Импорт списка книг")
 	fmt.Println("9. Добавление новой книги")
+	fmt.Println("10 Добавление нового читателя")
+	fmt.Println("11 Экспорт списка читателей")
+	fmt.Println("12 Импорт списка читателей")
 	fmt.Println("0. Выход")
 	fmt.Println("Выберите пункт меню:")
 }
@@ -174,9 +177,6 @@ func handleChoice(choice int, lib *library.Library, scanner *bufio.Scanner) {
 		}
 		lib.Books = loadedBooks
 		fmt.Printf("Список книгу успешно импортирован из файла %s\n", filename)
-		for _, book := range lib.Books {
-			fmt.Println(book)
-		}
 	case 9: //Новая книга
 		fmt.Println("Введите название книги")
 		scanner.Scan()
@@ -192,6 +192,38 @@ func handleChoice(choice int, lib *library.Library, scanner *bufio.Scanner) {
 			return
 		}
 		lib.AddBook(title, author(), year)
+	case 10: //Новый читатель
+		fmt.Println("Введите имя")
+		scanner.Scan()
+		firstName := scanner.Text()
+		fmt.Println("Введите фамилию")
+		scanner.Scan()
+		lastName := scanner.Text()
+
+		if _, err := lib.AddReader(firstName, lastName); err != nil {
+			fmt.Printf("Ошибка регистрации: %v", err)
+			return
+		}
+	case 11: //Экспорт списка читателей
+		fmt.Println("Введите название файла для экспорта в формате <название>.csv")
+		scanner.Scan()
+		filename := scanner.Text()
+		if err := storage.SaveReaderToCSV(filename, lib.Readers); err != nil {
+			fmt.Printf("Произошла ошибка экспорта: %v", err)
+			return
+		}
+		fmt.Printf("Список читателей успешно выгружен в файл %s", filename)
+	case 12: //Экспорт списка читателей
+		fmt.Println("Введите название файла для экспорта читателей в формате <название>.csv")
+		scanner.Scan()
+		filename := scanner.Text()
+		loadedReaders, err := storage.LoadReadersFromCSV(filename)
+		if err != nil {
+			fmt.Println("Ошибка импорта: ", err)
+			return
+		}
+		lib.Readers = loadedReaders
+		fmt.Printf("Список читателей успешно импортирован из файла %s\n", filename)
 	case 0:
 		fmt.Println("Всего доброго!")
 	} //switch

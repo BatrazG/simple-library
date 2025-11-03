@@ -18,24 +18,26 @@ func main() {
 	myLibrary.AddBook("мастер и маргарита", "Михаил Булгаков", 1998)*/
 
 	myLibrary.Books, _ = storage.LoadBooksFromCSV("books.csv")
+	myLibrary.Readers, _ = storage.LoadReadersFromCSV("readers.csv")
 	fmt.Println("--------------------------")
 
 	for i, book := range myLibrary.Books {
 		fmt.Println(i, book)
 	}
 
-	_, err := myLibrary.AddReader("Агунда", "Кокойти")
+	/*_, err := myLibrary.AddReader("Агунда", "Кокойти")
 	if err != nil {
 		fmt.Println(err)
 	} else {
 		fmt.Println("Читатель успешно добавлен")
-	}
+
+
 	_, err = myLibrary.AddReader("Сергей", "Меняйло")
 	if err != nil {
 		fmt.Println(err)
 	} else {
 		fmt.Println("Читатель успешно добавлен")
-	}
+	}*/
 
 	cli.Run(myLibrary)
 
