@@ -13,7 +13,7 @@ import (
 
 // Run запускает главный цикл консольного приложения.
 // Он принимает сервис библиотеки как зависимость.
-func Run(lib *library.Library) {
+func Run(lib *library.Library, dbPath string) {
 	scanner := bufio.NewScanner(os.Stdin)
 
 	for {
@@ -31,11 +31,11 @@ func Run(lib *library.Library) {
 		handleChoice(choice, lib, scanner) // Передаем сервис и сканер в обработчик
 
 		if choice == 0 {
-			if err := storage.SaveBooksToCSV("books.csv", lib.Books); err != nil {
+			fmt.Println("Сохранение данных и выход.")
+			if err := storage.SaveLibraryToJSON("books.json", lib); err != nil {
 				fmt.Println("Произошла ошибка сохранения списка книг:", err)
-				return
 			}
-			break // Выходим из цикла, если выбрали выход
+			return // Выходим из цикла, если выбрали выход
 		}
 	}
 }

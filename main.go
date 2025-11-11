@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"log"
+	"os"
 
 	"github.com/BatrazG/simple-library/cmd/cli"
 	"github.com/BatrazG/simple-library/library"
@@ -10,177 +12,31 @@ import (
 
 func main() {
 
-	myLibrary := library.New()
-
-	/*myLibrary.AddBook("1984", "Джордж Оруэлл", 1949)
-	myLibrary.AddBook("Мастер и Маргарита", "Михаил Булгаков", 1967)
-	myLibrary.AddBook("мастер и маргарита", "Михаил Булгаков", 1998)
-	myLibrary.AddBook("мастер и маргарита", "Михаил Булгаков", 1998)*/
+	/*myLibrary := library.New()
 
 	myLibrary.Books, _ = storage.LoadBooksFromCSV("books.csv")
-	myLibrary.Readers, _ = storage.LoadReadersFromCSV("readers.csv")
-	fmt.Println("--------------------------")
+	myLibrary.Readers, _ = storage.LoadReadersFromCSV("readers.csv")*/
 
-	for i, book := range myLibrary.Books {
-		fmt.Println(i, book)
-	}
+	//Выносим имя файла в константу
+	const dbFile = "books.json"
 
-	/*_, err := myLibrary.AddReader("Агунда", "Кокойти")
+	//Пытаемся загрузить библиотеку из файла
+	myLibrary, err := storage.LoadLibraryFromJSON(dbFile)
 	if err != nil {
-		fmt.Println(err)
-	} else {
-		fmt.Println("Читатель успешно добавлен")
-
-
-	_, err = myLibrary.AddReader("Сергей", "Меняйло")
-	if err != nil {
-		fmt.Println(err)
-	} else {
-		fmt.Println("Читатель успешно добавлен")
-	}*/
-
-	cli.Run(myLibrary)
-
-	/*allBooks := myLibrary.GetAllBooks()
-	for _, book := range allBooks {
-		fmt.Println(book)
-
-		fmt.Println("Ищем книгу по названию 'мастер и маргарита'")
-		foundBooks, err := myLibrary.FindBookByTitle("мастер и маргарита")
-		if err != nil {
-			fmt.Println("Неудачный поиск:", err)
+		//Если файл не найден - это не ошибка
+		//Создаем новую пустую библиотеку
+		if os.IsNotExist(err) {
+			fmt.Println("Файл данных не найден, создана новая библиотека")
+			myLibrary = library.New()
 		} else {
-			for i, book := range foundBooks {
-				fmt.Println(i+1, book)
-			}
+			//Если произошла другая ошибка, например JSON файл не корректен
+			//завершаем работу
+			log.Fatalf("Ошибка при загрузке библиотеки: %v", err)
 		}
-	}*/
-
-}
-
-/*fmt.Println("Запуск системы управления библиотекой")
-
-//1. Создаем экземпляр библиотеки
-myLibrary := &Library{} //Пустая библиотека готова к работе
-
-fmt.Println("Наполняем библиотеку")
-//2. Добавляем читателей
-_, err := myLibrary.AddReader("Агунда", "Кокойти")
-if err != nil {
-	fmt.Println(err)
-} else {
-	fmt.Println("Читатель успешно добавлен")
-}
-_, err = myLibrary.AddReader("Сергей", "Меняйло")
-if err != nil {
-	fmt.Println(err)
-} else {
-	fmt.Println("Читатель успешно добавлен")
-}
-
-//3. Добавляем книги
-myLibrary.AddBook("1984", "Джордж Оруэлл", 1949)
-myLibrary.AddBook("Мастер и Маргарита", "Михаил Булгаков", 1967)
-
-fmt.Println("\n---Библиотека готова к работе---")
-fmt.Println("Количество читателей:", len(myLibrary.Readers))
-fmt.Println("Количество книг:", len(myLibrary.Books))
-
-//Модуль 16. Практикум
-fmt.Println("---Тестируем выдачу книг---")
-//Выдаем книгу 1 читателю 1
-fmt.Println("Попытка выдать книгу 1 читателю 1")
-err = myLibrary.IssueBookToReader(1, 1)
-if err != nil {
-	fmt.Println("Ошибка выдачи:", err)
-} else {
-	fmt.Println("Книга успешно выдана")
-}
-
-//Попытка выдать ту же книгу еще раз
-fmt.Println("Поптка выдать уже выданную книгу")
-err = myLibrary.IssueBookToReader(1, 2)
-if err != nil {
-	fmt.Println("Ошибка выдачи:", err)
-} else {
-	fmt.Println("Книга успешно выдана")
-}
-
-fmt.Println("Попытка выдать несуществующую книгу")
-err = myLibrary.IssueBookToReader(99, 1)
-if err != nil {
-	fmt.Println("Ошибка выдачи:", err)
-} else {
-	fmt.Println("Книга успешно выдана")
-}
-
-fmt.Println("Попытка выдать книгу несуществующему читателю")
-err = myLibrary.IssueBookToReader(2, 99)
-if err != nil {
-	fmt.Println("Ошибка выдачи:", err)
-} else {
-	fmt.Println("Книга успешно выдана")
-}
-
-fmt.Println()
-
-//Смотрим все книги в библиотеке
-//myLibrary.ListAllBooks()
-//Рефактторинг 5
-fmt.Println("------")
-fmt.Println("Выводим список книг с помощью универсального метода:")
-allBooks := myLibrary.GetAllBooks()
-if len(allBooks) == 0 {
-	fmt.Println("Библиотека пуста")
-} else {
-	for i, book := range allBooks {
-		fmt.Printf("%d: %s\n", i+1, book)
+	} else {
+		fmt.Println("Библиотека успешно загружена из файла")
 	}
-}
-fmt.Println("------\n")
 
-//Тест возврата книги в библиотеку с помощью метода-дирижера Library.ReturnBook
-//Возвращаем успешно выданную книгу в библиотеку
-fmt.Println("Тест возврата книг")
-fmt.Println(myLibrary.Books[0])
-err = myLibrary.ReturnBook(1)
-if err != nil {
-	fmt.Println(err)
-} else {
-	fmt.Println("Книга успешно возвращена в библиотеку")
-	fmt.Println(myLibrary.Books[0])
-}
-//Тест попытки еще раз вернуть книгу, которая уже в библиотеке
-err = myLibrary.ReturnBook(1)
-if err != nil {
-	fmt.Println(err)
-} else {
-	fmt.Println("Книга успешно возвращена в библиотеку")
-	fmt.Println(myLibrary.Books[0])
-}
+	cli.Run(myLibrary, dbFile)
 
-//------------------
-//Тестируем config
-fmt.Println("------")
-fmt.Println("Поиск порта")
-config := map[string]string{
-	"PORT": "456",
 }
-
-port, err := GetPortFromConfig(config)
-if err != nil {
-	fmt.Println("Ошибка:", err)
-} else {
-	fmt.Println(port)
-}
-
-config = map[string]string{
-	"tort": "medivik",
-}
-port, err = GetPortFromConfig(config)
-if err != nil {
-	fmt.Println("Ошибка:", err)
-} else {
-	fmt.Println(port)
-}
-*/
