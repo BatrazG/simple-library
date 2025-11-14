@@ -13,7 +13,7 @@ import (
 
 // Run запускает главный цикл консольного приложения.
 // Он принимает сервис библиотеки как зависимость.
-func Run(lib *library.Library) {
+func Run(lib *library.Library, dbPath string) {
 	scanner := bufio.NewScanner(os.Stdin)
 
 	for {
@@ -31,11 +31,11 @@ func Run(lib *library.Library) {
 		handleChoice(choice, lib, scanner) // Передаем сервис и сканер в обработчик
 
 		if choice == 0 {
-			if err := storage.SaveBooksToCSV("books.csv", lib.Books); err != nil {
+			fmt.Println("Сохранение данных и выход.")
+			if err := storage.SaveLibraryToJSON("books.json", lib); err != nil {
 				fmt.Println("Произошла ошибка сохранения списка книг:", err)
-				return
 			}
-			break // Выходим из цикла, если выбрали выход
+			return // Выходим из цикла, если выбрали выход
 		}
 	}
 }
@@ -228,60 +228,3 @@ func handleChoice(choice int, lib *library.Library, scanner *bufio.Scanner) {
 		fmt.Println("Всего доброго!")
 	} //switch
 }
-
-/*
-//Создаем меню консольного приложения
-	scanner := bufio.NewScanner(os.Stdin)
-	for {
-		fmt.Println("Добро пожаловать в")
-		fmt.Println("\033[1m" + "Simple library" + "\033[0m") //С помощью управляющих символов делаем строку жирной
-		fmt.Println()
-
-
-
-		//Считываем ввод пользователя
-		scanner.Scan()
-		inputText := scanner.Text()
-
-		//Преобразуем строку в число
-		choice, err := strconv.Atoi(inputText)
-
-		//Проверяем на ошибку(если ввели не число)
-		if err != nil {
-			fmt.Println("Ошибка: пожалуйста, введите число от 1 до 8")
-			continue
-		}
-
-		//Выбираем действие
-		switch choice {
-		case 1: //поиск книги по названию
-			fmt.Println("Введите название книги:")
-			scanner.Scan()
-			title := scanner.Text()
-			foundBooks, err := myLibrary.FindBookByTitle(title)
-			if err != nil {
-				fmt.Println("Произошла ошибка: ", err)
-			} else if len(foundBooks) == 0 {
-				fmt.Printf("Совпадений с названием %s не найдено\n", title)
-			} else {
-				for _, book := range foundBooks {
-					fmt.Println(book)
-				}
-			}
-		case 2:
-			fmt.Println("Введите номер книги:")
-			scanner.Scan()
-			bookID, err := strconv.Atoi(scanner.Text())
-			if err != nil {
-				fmt.Println("Номер книги должен быть числом")
-				continue
-			}
-			foundBook, err := myLibrary.FindBookByID(bookID)
-			if err != nil {
-				fmt.Println("Произошла ошибка: ", err)
-			} else {
-				fmt.Printf("Книга с номером %d %s\n:", bookID, foundBook)
-			}
-		}
-	}
-*/

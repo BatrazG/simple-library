@@ -18,6 +18,27 @@ type Library struct {
 	lastReaderID int
 }
 
+// UpdateIDs находит максимальные ID среди книг и читателей
+// и устанавливает внутренние счетчики библиотеки на эти значения
+// Это необходимо вызывать после загрузки данных из файла
+func (lib *Library) UpdateIDs() {
+	maxBookID := 0
+	for _, book := range lib.Books {
+		if book.ID > maxBookID {
+			maxBookID = book.ID
+		}
+	}
+	lib.lastBookID = maxBookID
+
+	maxReaderID := 0
+	for _, reader := range lib.Readers {
+		if reader.ID > maxReaderID {
+			maxReaderID = reader.ID
+		}
+	}
+	lib.lastReaderID = maxReaderID
+}
+
 func New() *Library {
 	return &Library{
 		Books:   make([]*domain.Book, 0),

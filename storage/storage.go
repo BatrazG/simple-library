@@ -2,6 +2,7 @@ package storage
 
 import (
 	"encoding/csv"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -10,11 +11,64 @@ import (
 	"strconv"
 
 	"github.com/BatrazG/simple-library/domain"
+	"github.com/BatrazG/simple-library/library"
 )
 
 type Storable interface {
 	Save() error
 	Load() error
+}
+
+type storageData struct {
+	Books   []*domain.Book   `json:"books"`
+	Readers []*domain.Reader `json:"readers"`
+}
+
+// Сохраняет все данные библиотеки в JSON файл
+func SaveLibraryToJSON(filePath string, lib *library.Library) error {
+	//1. Создаем экземпляр нашей структуры-контейнера
+	data := storageData{
+		Books:   lib.Books,
+		Readers: lib.Readers,
+	}
+
+	//2. Сериализируем данные в JSON с отступами для читаемости.
+	jsonData, err := json.MarshalIndent(data, "", "  ")
+	if err != nil {
+		return err
+	}
+
+	//3. Записываем JSON-данные в файл
+	// 0644 - это стандартные права доступа к файлу (чтение/запись для владельца, чтение для остальных).
+	return os.WriteFile(filePath, jsonData, 0644)
+}
+
+func LoadLibraryFromJSON(filePath string) (*library.Library, error) {
+	//1. Читаем содержимое файла
+	jsonData, err := os.ReadFile(filePath) //Если файл не открывается, возвращаем ошибку
+	if err != nil {
+		return nil, err
+	}
+
+	//2. Создаем переменную-приемник
+	var data storageData
+
+	//3. Десериализируем JSON в нашу переменную - приемник
+	if err := json.Unmarshal(jsonData, &data); err != nil {
+		return nil, err
+	}
+
+	//4. Создаем новый экземпляр библиотеки
+	lib := library.New()
+	lib.Books = data.Books
+	lib.Readers = data.Readers
+
+	//Важно!!!
+	//Нужно обновить внутренние счетчики ID в библиотеке
+	//чтобы новые книги/читатели не получили уже существующие ID
+	lib.UpdateIDs()
+
+	return lib, nil
 }
 
 // Сохраняет срез книг в csv-файл
